@@ -22,6 +22,10 @@ import os
 import wand
 import collections.abc
 from wand.image import Image
+import exifread
+import piexif
+
+from GPSPhoto import gpsphoto
 
 class ImageDataPipeline:
     def __init__(self,source: str,destination: str):
@@ -29,27 +33,9 @@ class ImageDataPipeline:
         self.__destination = destination
         self.__crops_geo_data = {}
 
-    def get_image_details(self,file_location):
-        with Image(filename=file_location) as img:
-            print("***** Printing Image Metadata *****")
-            print('width =', img.width)
-            print('height =', img.height)
-            print('Metadata = ',img.metadata)
-            # print([(k, v) for k, v in img.metadata.items()])
-
-        # with Image(filename='1460533143_94615607b7_z.jpg') as img:
-        #     print('width =', img.width)
-        #     print('height =', img.height)
-            # print(dir(img))
-
-        # exif = {}
-        # with Image(filename='1460533143_94615607b7_z.jpg') as image:
-        #     exif.update((k[5:], v) for k, v in image.metadata.items()
-        #                            if k.startswith('exif:'))
-        #    print(exif)
 
     def extract_information_from_source(self):
-        PROJECT_DATA_STRUCTURE = {}
+        crops_geo_data = self.__crops_geo_data
         PROJECT_PATH = self.__source
 
         for folder_name in tqdm(os.listdir(PROJECT_PATH)):
@@ -58,29 +44,48 @@ class ImageDataPipeline:
             folder_location = "{}\{}".format(PROJECT_PATH,folder_name)
 
             for file_name in os.listdir(folder_location):
-                if folder_name not in PROJECT_DATA_STRUCTURE:
-                    PROJECT_DATA_STRUCTURE[folder_name] = []
+                if folder_name not in crops_geo_data:
+                    crops_geo_data[folder_name] = []
 
                 if file_name == ".DS_Store":
                     continue
 
                 file_location = "{}\{}".format(folder_location,file_name)
 
-                self.get_image_details(file_location)
-                # print(file_name,file_location)
-                # PROJECT_DATA_STRUCTURE[folder_name].append(file_name)
-        # print(PROJECT_DATA_STRUCTURE)
+                # Get the data from image file and return a dictionary
+                data = gpsphoto.getGPSData(file_location)
+                if data:
+                    crops_geo_data[folder_name].append((data['Latitude'],data['Longitude']))
+        return crops_geo_data
 
 
 if __name__ == '__main__':
 
+
+    #Constants
     WORKING_DIRECTORY = os.getcwd()
+    IMAGE_DIRECTORY = "images"
+    OUTPUT_DIRECTORY = "output"
+    source = "{}\{}".format(WORKING_DIRECTORY,IMAGE_DIRECTORY)
+    destination = "{}\{}".format(WORKING_DIRECTORY,OUTPUT_DIRECTORY)
 
-    SOURCE = "{}\images".format(WORKING_DIRECTORY)
-    DESTINATION = "{}\output".format(WORKING_DIRECTORY)
+    # Data Variables
+    crops_geo_data = None
 
-    gip = ImageDataPipeline(SOURCE,DESTINATION)
-    gip.extract_information_from_source()
+    gip = ImageDataPipeline(source,destination)
+
+    # Obejctive 1. Extract and format information from raw images.
+    # Extracting Geo Location from crop images for plotting later on
+    crops_geo_data = gip.extract_information_from_source()
+
+    # Obejctive 2. Prepare data for ingestion by a machine learning model.
+    """
+    This involves resizing images
+    """
+
+
+    print(crops_geo_data)
+
 
     # gip.extract_information()
 
