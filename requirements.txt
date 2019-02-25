@@ -5,8 +5,13 @@ tqdm
 wand
 exifread
 
+
 pillow
 gpsphoto
 piexif
 
 random2
+opencv-python
+copy
+
+bokeh
