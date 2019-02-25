@@ -53,7 +53,7 @@ class ImageDataPipeline:
             cv2.imwrite(processed_image_storage_location, final_image)
 
     """ Extracting Information from the source"""
-    def extract_information_from_images(self):      # Time Complexity : O(n) where n is the number of images in all the folders
+    def extract_information_from_images(self) -> dict :      # Time Complexity : O(n) where n is the number of images in all the folders
         image_source_path = self.__source
         crops_geo_data = {}
 
@@ -147,8 +147,6 @@ if __name__ == '__main__':
     """ *********** Objective 1. Extract and format information from raw images *********** """
     # Extracting Geo Location from crop images for plotting later on
     crops_geo_data = idp.extract_information_from_images()
-
-
 
 
     """ *********** Objective 2. Prepare data for ingestion by a machine learning model ***********  """
