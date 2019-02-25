@@ -13,22 +13,18 @@ Observations:
 Images are stored to their respective class folders.
 """
 
-# todo: Normalizing Image inputs
-# Data normalization is an important step which ensures that each input parameter (pixel, in this case) has a similar data distribution. This makes convergence faster while training the network.
-# todo: Data augmentation
-
 from tqdm import tqdm   #Shows progress bar for looping status
 import os
 from random2 import shuffle
 from GPSPhoto import gpsphoto
 import cv2
+import folium
 
 class ImageDataPipeline:
     def __init__(self,source: str,destination: str, TRAIN_TEST_VAL_PROPORTIONS: dict):
         self.__source = source
         self.__destination = destination
         self.__TRAIN_TEST_VAL_PROPORTIONS = TRAIN_TEST_VAL_PROPORTIONS
-        self.__crops_geo_data = {}
 
     def _create_output_directories(self, crop_folder_names: list):
         outer_folders = ['train', 'test', 'validation']
@@ -56,10 +52,10 @@ class ImageDataPipeline:
             # Writing the resized image to output location
             cv2.imwrite(processed_image_storage_location, final_image)
 
-    """STEP 1: Extract Information from the source"""
+    """ Extracting Information from the source"""
     def extract_information_from_images(self):      # Time Complexity : O(n) where n is the number of images in all the folders
         image_source_path = self.__source
-        crops_geo_data = self.__crops_geo_data
+        crops_geo_data = {}
 
         crop_folders_list = [name for name in os.listdir(image_source_path) if name != ".DS_Store"]
 
@@ -79,7 +75,7 @@ class ImageDataPipeline:
                     crops_geo_data[folder_name].append((data['Latitude'],data['Longitude']))
         return crops_geo_data
 
-    """STEP 2: Process and Organize images for CNN"""
+    """ Processing and Organizing images for CNN"""
     def process_and_store_images(self, image_output_dimensions: tuple):
         ttv_props = self.__TRAIN_TEST_VAL_PROPORTIONS
         image_source_path = self.__source
@@ -112,6 +108,25 @@ class ImageDataPipeline:
             for category_type, category_file_names in data_categories.items():
                 self._resize_and_store(category_type, folder_name, category_file_names,image_output_dimensions)
 
+    """ Creating a Map html file using Folium to plot crops based on image location """
+    def create_interactive_crop_map_plot(self,crops_geo_data:dict,map_file_name:str):
+        mapObject = None
+
+        for crop_type, geo_locations in crops_geo_data.items():
+
+            for lat,long in geo_locations:
+                logo_icon = folium.features.CustomIcon("crop_icons\{}.png".format(crop_type))
+                if not mapObject:
+                    mapObject = folium.Map(
+                        location=[lat, long],
+                        zoom_start=4.4,
+                    )
+                else:
+                    folium.Marker([lat, long],
+                                  popup=crop_type,
+                                  icon=logo_icon
+                                  ).add_to(mapObject)
+        mapObject.save(map_file_name)
 
 if __name__ == '__main__':
 
@@ -127,14 +142,26 @@ if __name__ == '__main__':
     source = "{}\{}".format(WORKING_DIRECTORY, IMAGE_DIRECTORY)
     destination = "{}\{}".format(WORKING_DIRECTORY, OUTPUT_DIRECTORY)
 
-    idp = ImageDataPipeline(source,destination,TRAIN_TEST_VALIDATION_PROPORTIONS)
+    idp = ImageDataPipeline(source,  destination,  TRAIN_TEST_VALIDATION_PROPORTIONS)
 
-    # Obejctive 1. Extract and format information from raw images.
+    """ *********** Objective 1. Extract and format information from raw images *********** """
     # Extracting Geo Location from crop images for plotting later on
     crops_geo_data = idp.extract_information_from_images()
 
-    # Obejctive 2. Prepare data for ingestion by a machine learning model.
+
+
+
+    """ *********** Objective 2. Prepare data for ingestion by a machine learning model ***********  """
     # This involves resizing images. Since channgel for all images is '3', they are not altered during the processing phase
     image_output_dimensions= (FINAL_IMAGE_DIMENSIONS["height"],FINAL_IMAGE_DIMENSIONS["width"])
     idp.process_and_store_images(image_output_dimensions)
 
+    """ *********** Objective 3. Create an easily reproduceable pipeline along with documenation. ***********  """
+
+
+    """ ***********  Objective 4. Visualize geolocation data ***********  """
+    # Visualizing the crops data on an interactive geographical map.
+    MAP_FILE_NAME= "Crops_Plot.html"
+
+    # Generating an HTML based map plot displaying geolocations of crop images
+    idp.create_interactive_crop_map_plot(crops_geo_data, MAP_FILE_NAME )

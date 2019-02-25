@@ -12,6 +12,6 @@ piexif
 
 random2
 opencv-python
-copy
 
-bokeh
+
+folium
