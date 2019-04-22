@@ -1,16 +1,20 @@
 # CropClassificationUsingCNN
 
-### Objectives
+## Objectives
+#### PART 1 - Data preparation and consolidation (Timeline - 12 hours)
     1. Extract and format information from raw images.
         GeoLocation in exif
     2. Prepare data for ingestion by a machine learning model.
     3. Create an easily reproduceable pipeline along with documenation.
     4. Visualize geolocation data.
+#### PART 2 - Building CNN Classifier (Pending)
+
+
 
 My choice for the quick prototyping is Python 3.6. 
-There are many image processing libraries having power and learning-curve tradeoff.
+There are many image processing libraries having power and learning-curve tradeoff. So choices will be made considering the project timeline.
 
-Observation:
+#### Observation:
 Data consists of JPEG Images of 5 different types of crops in their respective folders.
 The Images dont have a uniform aspect ratio. 
 Single Label Multi-Class Classification
