@@ -20,7 +20,7 @@ The Images dont have a uniform aspect ratio.
 Single Label Multi-Class Classification
 
 
-# ********* PROJECT SETUP GUIDELINES FOR TESTING *********
+# PROJECT SETUP GUIDELINES FOR TESTING 
 
         Python 3.6 is used and the dependencies are mentioned in the 'requirements.txt' file.
         Download and install Python 3.6
@@ -34,7 +34,7 @@ Single Label Multi-Class Classification
         Normally deep learning frameworks like Keras and TensorFlow accept the image data in this fashion.
 
 
-************ Project Walkthrough and thought process ************
+### Project Walkthrough and thought process 
 
         The image data for various crops are present in jpg format with both the dimensions greater than required (224,224). So no blurring on resize mostly.
         Maintaining aspect ratio can be priority in Image Classification problems, but Resizing is also considered to good results. Cropping randomly can be tricky
@@ -58,7 +58,7 @@ Single Label Multi-Class Classification
 
 
 
-# ************ General Information Extraction Process thoughts ************
+# General Information Extraction Process thoughts 
 
 
  ## 1> Training data acquisition and storage
